@@ -59,18 +59,18 @@ void respuesta(int matriz[6][6], int n){
 				z=(z-n);						
 			}
 			matriz[i][j]=z;								//Asigna el número a la posición correspondiente en la matriz.
-			respaldo[i][j]=z;
-			z++;
+			respaldo[i][j]=z;							//generamos un respaldo de la matriz.
+			z++;										//Aumenta el valor de z.
 		}
-		z=original;
+		z=original;										//devuelve z a su valor original.
 	}
-	for(int i=0; i<n; i++){								//ceros.
+	for(int i=0; i<n; i++){								//Llena el vector en ceros.
 		vector[i]=0;
 	}
-	while(vector[n-1]==0){
-		do{
-			x=1+rand()%n;
-			for(int i=0; i<n; i++){
+	while(vector[n-1]==0){								//ciclo while que se repetirá mientras que no se generen todos los números hasta n.
+		do{												//ciclo do while que se repetirá mientras que el número generado esté repetido en el vector.
+			x=1+rand()%n;								//Se le asigna un número aleatorio a una variable x.
+			for(int i=0; i<n; i++){						//Ciclo for que buscará el número generado en el vector.
 				if(x==vector[i]){
 					bandera=1;
 					break;
@@ -78,22 +78,21 @@ void respuesta(int matriz[6][6], int n){
 					bandera=0;
 				}
 			}
-		}while(bandera==1);
-		vector[k]=x;
-		k++;
+		}while(bandera==1);								
+		vector[k]=x;									//Una vez generado un número que no se encuentre antes en el vector lo guarda en el mismo.
+		k++;											//aumenta la variable k que permitirá guardar los números en distintas posiciones del vector.
 	}
-	for(int i=0; i<n; i++){
+	for(int i=0; i<n; i++){								//ciclo que permite intercambiar los valores de la matriz de manera horizontal en función con los números generados.
 		for(int j=0; j<n; j++){
 			matriz[i][j]=respaldo[i][vector[j]-1];
 		}
 	}
-	for(int i=0; i<n; i++){
+	for(int i=0; i<n; i++){								//ciclo que actualiza el respaldo con los cambios realizados.
 		for(int j=0; j<n; j++){
 			respaldo[i][j]=matriz[i][j];
 		}
 	}
-	
-	for(int i=0; i<n; i++){
+	for(int i=0; i<n; i++){								//ciclo que permite intercambiar los valores de la matriz de manera vertical en función con los números generados.
 		for(int j=0; j<n; j++){
 			matriz[j][i]=respaldo[vector[j]-1][i];
 		}
