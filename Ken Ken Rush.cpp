@@ -1,38 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "rodo.h"
+#include <windows.h>
+#include "graph.h"
 //Prototipos.
 void ceros(int matriz[6][6], int muestra[6][6], int usuarios[6][6], int n); //Función que llena en ceros las matrices usadas.
 void respuesta(int matriz[6][6], int n);									//Función que genera un cuadrado Latino (CL).
 void calculos(int muestra[6][6], int matriz[6][6], int n);					//Función que dado el CL asocia casillas y genera los calculos a realizar.
-void user(int muestra[6][6], int usuario[6][6], int n);						//Función que permite al usuario llenar un arreglo
-void resultado(int matriz[6][6],int usuario[6][6], int muestra[6][6],int n);
+void user(int muestra[6][6], int usuario[6][6], int n);						//Función que permite al usuario llenar un arreglo.
+void resultado(int matriz[6][6],int usuario[6][6], int muestra[6][6],int n);//Función que determina si el usuario ganó o perdió.
+void sound();																//Función que reproduce la musica.
+void again(char r);															//Función que permite al usuario jugar de nuevo sin cerrar el programa.
 //Bloque Principal.
 int main(){
 	int n, matriz[6][6], muestra[6][6], usuario[6][6];  //Declaración de variables requeridas.
-	system("cls");
-	system("color 0b");
-	title();
-	cls();
-	system("color 07");
-	for(int i=0; i<30; i++){
-		printf("\n");
-	}
-	sp(3);printf("Ingrese el orden de la matriz \n");			//Imprime mensaje que solicite el orden de la Matriz.
-	scanf("%d",&n);
-	ceros(matriz,muestra, usuario, n);							//Llama a la función ceros.
-	pp(n, matriz, usuario);
-	if(n>=3 && n<=6){	 								//Lee el orden de la matriz.
+	char r;												//declaración de la variable que se enviará a la función "again"
+	system("mode con lines=35");						//Establece un largo de 35 lineas para la ventana del programa.
+	system("mode con cols=110");						//Establece un ancho de 110 columnas para la ventana del programa.
+	sound();											//Llama a la función del sonido.
+	cls();												//limpia la pantalla.
+	system("color 0b");									//Color aqua.
+	printf("KenKen Rush v.0.0.1 Beta");					//Mensaje con la Versión.
+	tt();												//Llama a la función del título.
+	system("pause");									//Espera...
+	cls();												//Limpia Pantalla.
+	csr();												//Llama a la función con la pantalla que pide el orden de la Matriz.
+	dsn(5);scanf("%d",&n);								//Lee el orden de la Matriz.
+	if(n>=3 && n<=6){	 								//Si el numero cumple con los requisitos...
 		ceros(matriz,muestra, usuario, n);				//Llama a la función ceros.
+		pp(n,muestra,usuario);							//Llama esta función que asignará colores por tableros y los centrará.
 		respuesta(matriz, n);							//Llama a la función respuesta.
 		calculos(muestra, matriz, n);					//Llama a la función calculo.
 		user(muestra, usuario, n);						//Llama a la función user.
 		resultado(matriz, usuario,muestra, n);			//Llama a la función resultado.
-		system("pause");
-	}else{
-		system("color d");
-		sp(5);printf("Este juego no est\240 dise\244ado para n\243meros mayores que 6 ni menores que 2\n");  //If que controla no salirse del rango e imprima mensaje si sucede.
+	}else{												//Si sale de Rango del Juego...
+		cls();											//Limpia Pantalla.
+		system("color d");								//Color Morado.
+		dsn(1);											//Llama todas las funciones que componen el Título.
+		logo();
+		dsn(1);
+		kkd();
+		dsn(1);
+		dsn(5);printf("Este juego no est\240 dise\244ado para n\243meros mayores que 6 \n");  //Mensaje que avisa que se salió de rango.
+		dsn(5);printf("ni menores que 2\n");
+		system("pause");								//Esperar...
+		cls();											//Limpia Pantalla...
+		dsn(1);											//LLama de nuevo todas las funciones del TITULO. (No llamamos al titulo, porque necesitamos mensajes diferentes del de inicio).
+		logo();	
+		dsn(1);
+		kkd();
+		dsn(1);
+		dsn(5);printf("Desea jugar otra vez?\n");		//Preguntamos si desea jugar de nuevo.
+		dsn(5);printf("Si[S]  /  No[N]\n");				
+		dsn(5);scanf("%s",&r);							//recibe la respuesta que se mandará a la funcion "again".
+		again(r);										//Llama a la función "again" y le manda la respuesta.
 	}
 }
 //Implemmentaciones
@@ -48,7 +69,7 @@ void ceros(int matriz[6][6], int muestra[6][6], int usuario[6][6], int n){
 }
 						//respuesta.
 void respuesta(int matriz[6][6], int n){
-	int z, original;									//Declaración de variables.
+	int respaldo[6][6],z, original,x,vector[6],bandera,k=0;		//Declaración de variables.
 	srand(time(NULL));									//Semilla.
 	z=1+rand()%n;										//asigna a z un numero aleatorio de 1 a n.
 	original=z;											//Guarda el número generado.								
@@ -59,9 +80,43 @@ void respuesta(int matriz[6][6], int n){
 				z=(z-n);						
 			}
 			matriz[i][j]=z;								//Asigna el número a la posición correspondiente en la matriz.
-			z++;
+			respaldo[i][j]=z;							//generamos un respaldo de la matriz.
+			z++;										//Aumenta el valor de z.
 		}
-		z=original;
+		z=original;										//devuelve z a su valor original.
+	}
+	for(int i=0; i<n; i++){								//Llena el vector en ceros.
+		vector[i]=0;
+	}
+	while(vector[n-1]==0){								//ciclo while que se repetirá mientras que no se generen todos los números hasta n.
+		do{												//ciclo do while que se repetirá mientras que el número generado esté repetido en el vector.
+			x=1+rand()%n;								//Se le asigna un número aleatorio a una variable x.
+			for(int i=0; i<n; i++){						//Ciclo for que buscará el número generado en el vector.
+				if(x==vector[i]){
+					bandera=1;
+					break;
+				}else{
+					bandera=0;
+				}
+			}
+		}while(bandera==1);								
+		vector[k]=x;									//Una vez generado un número que no se encuentre antes en el vector lo guarda en el mismo.
+		k++;											//aumenta la variable k que permitirá guardar los números en distintas posiciones del vector.
+	}
+	for(int i=0; i<n; i++){								//ciclo que permite intercambiar los valores de la matriz de manera horizontal en función con los números generados.
+		for(int j=0; j<n; j++){
+			matriz[i][j]=respaldo[i][vector[j]-1];
+		}
+	}
+	for(int i=0; i<n; i++){								//ciclo que actualiza el respaldo con los cambios realizados.
+		for(int j=0; j<n; j++){
+			respaldo[i][j]=matriz[i][j];
+		}
+	}
+	for(int i=0; i<n; i++){								//ciclo que permite intercambiar los valores de la matriz de manera vertical en función con los números generados.
+		for(int j=0; j<n; j++){
+			matriz[j][i]=respaldo[vector[j]-1][i];
+		}
 	}
 }	
 					//calculos.
@@ -91,6 +146,7 @@ void calculos(int muestra[6][6], int matriz[6][6], int n){
 				if(matriz[0][0]>matriz[1][0]){
 					calculo=matriz[0][0]/matriz[1][0];
 					operacion=47;
+					
 				}else{
 					calculo=matriz[1][0]/matriz[0][0];
 					operacion=47;
@@ -1031,6 +1087,7 @@ void user(int muestra[6][6], int usuario[6][6], int n){
 	int fil, col, valor, pregunta; 							//Declaración de variables usadas.
 	do{														//ciclo do wuile que permita repetir siempre que el usuario así lo desee.
 		cls();
+		logo();
 		switch(n){											//Switch para llamar a la funcion que corresponda según el orden de la matriz.
 			case 3:
 				tres(muestra, usuario);
@@ -1045,35 +1102,42 @@ void user(int muestra[6][6], int usuario[6][6], int n){
 				seis(muestra, usuario);
 				break;
 		}
-		printf("fila de la casilla que desea llenar \n");	//Muestra un mensaje pidiendo la fila de la casilla.
-		scanf("%d",&fil);									//Lee la fila.
-		printf("columna de la casilla que desea llenar \n");//Muestra un mensaje pidiendo la columna de la casilla.
-		scanf("%d",&col);									//Lee la columna.
-		printf("valor con que desea llenar \n");			//Pide el valor que se pondrá en la casilla indicada.
-		scanf("%d",&valor);									//lee dicho valor.
-		usuario[fil][col]=valor;							//Llena el valor dado en la casilla indicada. 
-		cls();												//De nuevo hace un Clear Screen.
-		switch(n){											//Switch para llamar a la funcion que corresponda según el orden de la matriz.
-			case 3:
-				tres(muestra, usuario);
-				break;
-			case 4:
-				cuatro(muestra, usuario);
-				break;
-			case 5: 
-				cinco(muestra, usuario);
-				break;
-			case 6:
-				seis(muestra, usuario);
-				break;
+		dsn(5);printf("fila de la casilla que desea llenar \n");	//Muestra un mensaje pidiendo la fila de la casilla.
+		dsn(5);scanf("%d",&fil);											//Lee la fila.
+		dsn(5);printf("columna de la casilla que desea llenar \n");//Muestra un mensaje pidiendo la columna de la casilla.
+		dsn(5);scanf("%d",&col);											//Lee la columna.
+		dsn(5);	printf("valor con que desea llenar \n");		//Pide el valor que se pondrá en la casilla indicada.
+		dsn(5);scanf("%d",&valor);										//lee dicho valor.
+		if(valor>n || valor<0){											//Condicional que controla que los números ingresados entén en el dominio del Ken Ken.
+			dsn(5);printf("Debes Colocar un Valor entre 1 y %d\n",n);
+			pregunta==1;
+		}else{
+			usuario[fil][col]=valor;							//Llena el valor dado en la casilla indicada. 
+			cls();												//De nuevo hace un Clear Screen.
+			logo();
+			switch(n){											//Switch para llamar a la funcion que corresponda según el orden de la matriz.
+				case 3:
+					tres(muestra, usuario);
+					break;
+				case 4:
+					cuatro(muestra, usuario);
+					break;
+				case 5: 
+					cinco(muestra, usuario);
+					break;
+				case 6:
+					seis(muestra, usuario);
+					break;
+			}
 		}
-		printf("desea llenar otra casilla? SI=1 NO=0 \n");//pregunta si desea llenar otra casilla, al resonder si, se repetirá el ciclo.
-		scanf("%d",&pregunta);							  //recibe la respuesta
+		dsn(5);printf("desea llenar otra casilla? SI=1 NO=0 \n");//pregunta si desea llenar otra casilla, al resonder si, se repetirá el ciclo.
+		dsn(5);scanf("%d",&pregunta);					  //recibe la respuesta
 	}while(pregunta==1);								  //Compara la respuesta dada y determina si se repite o no el ciclo.	
 }		
 					//resultado.
 void resultado(int matriz[6][6],int usuario[6][6], int muestra[6][6], int n){
 	int iguales=0;										//Declara la variable tipo contador usada para determinar la victoria o derrota.
+	char r;	
 		for(int i=0; i<n; i++){							//Doble ciclo que comparará valor por valor la matriz original y la que lleno el usuario.
 			for(int j=0; j<n; j++){
 				if(matriz[i][j]==usuario[i][j]){
@@ -1082,24 +1146,24 @@ void resultado(int matriz[6][6],int usuario[6][6], int muestra[6][6], int n){
 			}
 		}
 		if(iguales==(n*n)){								//Si el contador es igual a n^2 entonces ambas matrices son identicas, lo que significa que el usuario ha ganado.
-			system("color a");							//Cambio de color a Verde.
-			won();										//Imprime mensaje de Victoria.
+			game(1,n,muestra,usuario,matriz);			//Envía el resultdo a la función que mostrará el mensaje de victoria.					
+			tb(6);sp(6);scanf("%s",&r);					//Recibe la respuesta para la función "again" (No hacemos la pregunta porque la función llamada arriba lo hace).
+			again(r);									//Llama a la función "again".
 		}else{											//Caso contrario el usuario ha perdido.
-			system("color c");							//cambio de color a rojo.
-			lose();									 	//Mensaje de Derrota.
-			switch(n){									//se le da el resultado correcto.
-				case 3:
-					tres(muestra, matriz);
-					break;
-				case 4:
-					cuatro(muestra, matriz);
-					break;
-				case 5: 
-					cinco(muestra, matriz);
-					break;
-				case 6:
-					seis(muestra, matriz);
-					break;
-			}
+			game(0,n,muestra,usuario,matriz);			//Envía el resultdo a la función que mostrará el mensaje de derrota.	
+			tb(6);sp(6);scanf("%s",&r);					//Recibe la respuesta para la función "again" 
+			again(r);									//Llama a la función "again".
 		}
-}									
+}	
+		//Sound.
+void sound(){											
+	char soundfile[] = "8 bits.wav" ;					//declara la variable con el nombre del archivo de audio a reproducir.
+	PlaySound((LPCSTR)soundfile, NULL, SND_LOOP | SND_ASYNC );//Función que reproduce el audio de manera repetitiva.
+}
+		//Again.	
+void again(char r){										
+	cls();												//Limpia la pantalla.
+	if(r=='S' || r=='s'){								//Si respondió si llama a la función main haciendo que todo vuelva a empezar(No importa si el usuario ingresa mayúsculas o minúsculas, si es "S" lo hará).
+		main();
+	}
+}							
